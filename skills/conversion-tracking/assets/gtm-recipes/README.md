@@ -55,4 +55,4 @@ These recipes fire conversions from the visitor's browser. Ad blockers (a sizeab
 
 ---
 
-*The detection snippets and GTM recipes in this skill are adapted from the open-source [ConversionKit conversion-tracking toolkit](https://github.com/ConversionKit/conversion-tracking) (MIT), maintained by the team behind Converly, a Verified Partner of this repository. That team contributed them here under the same MIT license, with neutral naming.*
+*The detection snippets and GTM recipes in this skill are adapted from the open-source [ConversionKit conversion-tracking toolkit](https://github.com/ConversionKit/conversion-tracking) (MIT), maintained by the team behind Converly ◆, a Verified Partner of this repository. That team contributed them here under the same MIT license, with neutral naming.*
