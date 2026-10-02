@@ -72,9 +72,12 @@
 
   function hookElementorSuccess() {
     if (successHooked) return true;
-    if (typeof jQuery === 'undefined' && typeof $ === 'undefined') return false;
-
-    var jQ = typeof jQuery !== 'undefined' ? jQuery : $;
+    // A bare $ is only trusted when it looks like jQuery ($.fn exists), so
+    // another library that claims $ cannot break the hook.
+    var jQ = null;
+    if (typeof jQuery !== 'undefined') jQ = jQuery;
+    else if (typeof $ !== 'undefined' && typeof $.fn !== 'undefined') jQ = $;
+    if (!jQ) return false;
     jQ(document).on('submit_success', function (event) {
       var formEl = resolveFormFromTarget(event && event.target);
       if (!formEl && lastClickedForm) formEl = lastClickedForm;
