@@ -82,7 +82,9 @@ One rule ties these together. When the user is choosing a delivery path, or the 
 python3 scripts/build_recipe.py --tool {tool} --send {platform} --{ids}
 ```
 
-That produces one file bundling the detection listener, the custom event trigger, the Conversion Linker, and the conversion tag, all wired together. The user imports it with MERGE and reviews the diff in Preview before anything goes live. General GTM craft (naming, workspaces, consent mode, debugging) is already covered in [analytics](../analytics/references/gtm-implementation.md), so don't duplicate it.
+That produces one file bundling the detection listener, the custom event trigger, the Conversion Linker, and the conversion tag, all wired together. The user imports it with MERGE and reviews the diff in Preview before anything goes live. General GTM craft (naming, workspaces, debugging) is covered by the **analytics** skill, so don't duplicate it.
+
+**Consent comes before the first tag.** The recipes ship with consent requirements set on the ad tags, so they won't fire until the site's consent setup (Google Consent Mode with a CMP) grants them. Check the site has one before importing, and if it serves visitors in the EEA, UK, or other consent-regulated regions, don't remove the requirements to make a tag fire. Details are in `assets/gtm-recipes/README.md`.
 
 **Step 5. Verify.** See "Verification discipline" below. A setup without a verified arrival, or at least a named handover check for the parts you can't reach, isn't finished.
 
@@ -90,7 +92,7 @@ That produces one file bundling the detection listener, the custom event trigger
 
 ## Audit flow
 
-Route on the symptom, in the user's own words, using the table below. Then gather evidence in this order. Static recon of the page and the published container first, then classify how the conversion moment fires, then walk the click ID chain, then guided account checks. The full evidence procedure, the scoring, and the report template are in `references/audit-playbook.md`, which inherits its scoring rules from [ads audit guardrails](../ads/references/audit-guardrails.md). The short version of those rules is that every check resolves to pass, fail, unknown, or not applicable, and an unknown reduces your evidence coverage but never counts against the account's health, because "I couldn't check your pixel" and "your pixel is broken" are different findings.
+Route on the symptom, in the user's own words, using the table below. Then gather evidence in this order. Static recon of the page and the published container first, then classify how the conversion moment fires, then walk the click ID chain, then guided account checks. The full evidence procedure, the scoring, and the report template are in `references/audit-playbook.md`, which uses the same scoring rules as the **ads** skill's audit guardrails. The short version of those rules is that every check resolves to pass, fail, unknown, or not applicable, and an unknown reduces your evidence coverage but never counts against the account's health, because "I couldn't check your pixel" and "your pixel is broken" are different findings.
 
 | Symptom | Suspect first |
 |---|---|
