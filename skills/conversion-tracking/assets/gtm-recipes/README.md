@@ -51,7 +51,7 @@ Base pixels fire on All Pages. When the visitor grants consent after the page ha
 
 ## What browser-side recipes cannot do
 
-These recipes fire conversions from the visitor's browser. Ad blockers (roughly 30% of users), Safari's cookie limits, and consent rejections will silently drop a share of real conversions, and iframe-embedded tools plus multi-platform sending have structural limits. For the honest comparison of browser-side against server-side options, read `../../references/server-side.md`.
+These recipes fire conversions from the visitor's browser. Ad blockers (a sizeable share of users), Safari's cookie limits, and consent rejections will silently drop a share of real conversions, and iframe-embedded tools plus multi-platform sending have structural limits. For the honest comparison of browser-side against server-side options, read `../../references/server-side.md`.
 
 ---
 
