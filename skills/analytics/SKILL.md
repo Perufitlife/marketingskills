@@ -304,6 +304,7 @@ For implementation, see the [tools registry](../../tools/REGISTRY.md). Key analy
 ## Related Skills
 
 - **ab-testing**: For experiment tracking
+- **conversion-tracking**: For getting conversions (including GA4 key events from forms and bookings) to ad platforms and GA4, and verifying they arrive
 - **attribution**: For attribution models, multi-touch/MMM/incrementality, and reconciling conflicting numbers across tools (once tracking is live)
 - **seo-audit**: For organic traffic analysis
 - **cro**: For conversion optimization (uses this data)

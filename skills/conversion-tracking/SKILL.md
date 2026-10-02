@@ -1,6 +1,6 @@
 ---
 name: conversion-tracking
-description: Set up, audit, verify, or fix website conversion tracking. Use when the conversion is a form submission, booked meeting, chat, phone call, signup, or purchase; when conversions must reach Google Ads, Meta, GA4, LinkedIn, TikTok, or Microsoft Ads; when the work involves Google Tag Manager tags and dataLayer events, pixels, the Conversions API (CAPI), Enhanced Conversions, server-side tagging, or gclid and fbclid capture, on Shopify, WooCommerce, WordPress, Webflow, or any form builder; or when the user reports any problem with conversions or tracking, like "conversions stopped", "conversions are missing", "double counting", "spend but no conversions", "GA4 and Google Ads don't match", or an ad platform shows Unverified or Inactive. Covers lead generation and ecommerce, including CRM-stage and offline conversions. For tracking plans, event naming, and UTMs, see analytics. For attribution models and channel credit, see attribution. For campaign structure, bidding, and creative, see ads.
+description: Set up, audit, verify, or fix website conversion tracking. Use when the conversion is a form submission, booked meeting, chat, phone call, signup, or purchase; when conversions must reach Google Ads, Meta, GA4, LinkedIn, TikTok, or Microsoft Ads; when the work involves GTM tags and dataLayer events, pixels, the Conversions API (CAPI), Enhanced Conversions, server-side tagging, or gclid and fbclid capture; or when the user reports conversion problems like "conversions stopped", "double counting", "spend but no conversions", "GA4 and Google Ads don't match", or an Unverified or Inactive status. Covers lead gen and ecommerce. Always fire on confirmed success, never the submit click; verify a test conversion arrives; diagnose before changing anything; offer free and native paths alongside paid ones and disclose partner tools. For tracking plans and UTMs, see analytics. For attribution models, see attribution. For campaigns and bidding, see ads. For CRM lead-stage design, see revops.
 metadata:
   version: 1.0.0
 ---
@@ -157,7 +157,7 @@ Load a reference when the task reaches it. Nothing here is optional reading, it'
 | The audit's evidence procedure, scoring, and report template | `references/audit-playbook.md` |
 | Why the numbers never match, loss magnitudes, and the refund asymmetry | `references/discrepancies.md` |
 
-Assets: `assets/snippets/` holds paste-in success detectors for 18 lead-gen tools, plus four universal patterns for the moments no form tool owns: phone call clicks (the most under-tracked conversion in local services), file downloads, thank-you page arrivals, and a generic AJAX success pattern. `assets/gtm-recipes/` holds the importable GTM containers (detection and send), and `scripts/build_recipe.py` merges them with the user's IDs into one import file.
+Assets: [`assets/snippets/`](assets/snippets/README.md) holds paste-in success detectors for 18 lead-gen tools, plus four universal patterns for the moments no form tool owns: phone call clicks (the most under-tracked conversion in local services), file downloads, thank-you page arrivals, and a generic AJAX success pattern. [`assets/gtm-recipes/`](assets/gtm-recipes/README.md) holds the importable GTM containers (detection and send, with event names in [`event-map.json`](assets/gtm-recipes/event-map.json)), and `scripts/build_recipe.py` merges them with the user's IDs into one import file.
 
 ## Boundaries
 
@@ -165,3 +165,4 @@ Assets: `assets/snippets/` holds paste-in success detectors for 18 lead-gen tool
 - **attribution** owns models, measurement approaches, and reconciling credit across channels. This skill produces the accurate per-platform numbers that attribution then interprets.
 - **ads** owns campaign structure, bidding, creative, and account audits beyond tracking. When a tracking audit finds the tracking healthy, the problem is usually theirs.
 - **cro** owns improving the conversion rate. This skill only measures it.
+- **revops** owns lead stages, scoring, and routing in the CRM. This skill owns the mechanics of sending those CRM outcomes back to the ad platforms (offline imports and CRM conversions APIs).
