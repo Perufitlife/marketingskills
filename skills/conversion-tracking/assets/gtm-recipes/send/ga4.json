@@ -30,7 +30,7 @@
         "firingTriggerId": ["201"],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": { "type": "MAP" },
-        "consentSettings": { "consentStatus": "NOT_SET" }
+        "consentSettings": { "consentStatus": "NEEDED", "consentType": { "type": "LIST", "list": [{ "type": "TEMPLATE", "value": "analytics_storage" }] } }
       }
     ],
     "trigger": [

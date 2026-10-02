@@ -44,7 +44,16 @@
           "type": "MAP"
         },
         "consentSettings": {
-          "consentStatus": "NOT_SET"
+          "consentStatus": "NEEDED",
+          "consentType": {
+            "type": "LIST",
+            "list": [
+              {
+                "type": "TEMPLATE",
+                "value": "ad_storage"
+              }
+            ]
+          }
         }
       },
       {
@@ -73,7 +82,16 @@
           "type": "MAP"
         },
         "consentSettings": {
-          "consentStatus": "NOT_SET"
+          "consentStatus": "NEEDED",
+          "consentType": {
+            "type": "LIST",
+            "list": [
+              {
+                "type": "TEMPLATE",
+                "value": "ad_storage"
+              }
+            ]
+          }
         }
       }
     ],

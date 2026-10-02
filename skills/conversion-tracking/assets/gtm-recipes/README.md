@@ -30,6 +30,25 @@ No Python available? Do the merge by hand: import the detect recipe as-is, then 
 2. **Publish** the workspace. Tags in an unpublished workspace record nothing.
 3. If the container already had a Conversion Linker tag, delete the duplicate one the recipe added.
 
+## Consent and privacy
+
+Every tag in `send/` ships with GTM's **Additional consent checks** set to "Require additional consent for tag to fire" (`consentStatus: NEEDED` in the JSON):
+
+| Tag | Required consent types |
+|---|---|
+| Google Ads Conversion | `ad_storage`, `ad_user_data`, `ad_personalization` |
+| Conversion Linker | `ad_storage` |
+| GA4 Event | `analytics_storage` |
+| Meta, TikTok, LinkedIn, Microsoft base tags and conversion tags | `ad_storage` |
+
+The detect listeners themselves stay `NOT_SET`: they only push a dataLayer event and set no cookies.
+
+**The importer must have Consent Mode configured.** These checks read consent state that a consent management platform (CMP) sets through Google Consent Mode, normally from a tag on the Consent Initialization trigger. With no CMP sending consent, GTM treats every type as not granted and none of these tags fire. If the site genuinely needs no consent banner, change the setting (below) rather than leaving tracking silently dead.
+
+Base pixels fire on All Pages. When the visitor grants consent after the page has loaded, the base pixel does not retry by itself. Add a second firing trigger on your CMP's consent-update dataLayer event (for example `cookie_consent_update`) to the base tags so they load as soon as consent arrives.
+
+**To change it:** in GTM open the tag, then Advanced Settings, then Consent Settings, and choose "No additional consent required" or edit the listed types. To change it before import, edit the tag's `consentSettings` in the JSON: `{"consentStatus": "NOT_NEEDED"}`, or `NEEDED` with a `consentType` list of `{"type": "TEMPLATE", "value": "<consent type>"}` items. Google's own tags (Google Ads, Conversion Linker, GA4) also have built-in consent checks, so a site running Consent Mode in advanced mode (cookieless pings before consent) can switch those three to "No additional consent required" and let Consent Mode handle them.
+
 ## What browser-side recipes cannot do
 
 These recipes fire conversions from the visitor's browser. Ad blockers (roughly 30% of users), Safari's cookie limits, and consent rejections will silently drop a share of real conversions, and iframe-embedded tools plus multi-platform sending have structural limits. For the honest comparison of browser-side against server-side options, read `../../references/server-side.md`.
