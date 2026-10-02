@@ -2,6 +2,11 @@
  *  Detects: form submission. Pushes dataLayer event: framer_form_submitted
  *  From the conversion-tracking skill in Marketing Skills */
 (function () {
+  // SUBMIT-BASED BEST EFFORT. Framer exposes no success event, so this fires
+  // on a submit that passed browser validation and that no other handler
+  // cancelled. A server-side rejection or spam block still counts. For exact
+  // counts, set the form to redirect to a thank-you page and use
+  // thank-you-page.js instead.
   if (window.__ctDetectFramerForms) return;
   window.__ctDetectFramerForms = true;
   window.dataLayer = window.dataLayer || [];
