@@ -13,9 +13,13 @@ Examples:
 
 The output file is imported in GTM via Admin > Import Container, choosing an
 existing workspace and MERGE (not overwrite). Uses only the Python standard
-library. Run from anywhere; paths resolve relative to this file.
+library (3.8+). Run from anywhere; paths resolve relative to this file.
+
+Every ID is checked against its platform's format before use, and values are
+substituted into the parsed container (never into serialized JSON), with
+JavaScript escaping inside Custom HTML tags.
 """
-import argparse, json, sys
+import argparse, json, re, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -23,10 +27,70 @@ DETECT_DIR = ROOT / "assets" / "gtm-recipes" / "detect"
 SEND_DIR = ROOT / "assets" / "gtm-recipes" / "send"
 EVENT_MAP = ROOT / "assets" / "gtm-recipes" / "event-map.json"
 
+# (pattern, human description) per kind of ID. Kept strict on purpose: every
+# accepted value is also safe inside a quoted or unquoted JavaScript literal.
+FORMATS = {
+    "google_ads_id": (r"[0-9]{6,15}", "digits, e.g. 123456789 (AW- prefix optional)"),
+    "google_ads_label": (r"[A-Za-z0-9_-]{1,64}", "letters, digits, _ and -, e.g. AbCdEfGhIj"),
+    "ga4_id": (r"G-[A-Z0-9]{4,20}", "G- followed by letters and digits, e.g. G-ABC123XYZ"),
+    "meta_pixel": (r"[0-9]{6,20}", "digits, e.g. 1234567890123456"),
+    "tiktok_pixel": (r"[A-Z0-9]{10,30}", "uppercase letters and digits, e.g. C4ABCDEFGH1234567890"),
+    "linkedin_partner": (r"[0-9]{1,15}", "digits, e.g. 1234567"),
+    "linkedin_conversion": (r"[0-9]{1,15}", "digits, e.g. 12345678"),
+    "uet_tag": (r"[0-9]{4,15}", "digits, e.g. 187000000"),
+    "event_name": (r"[A-Za-z][A-Za-z0-9_]{0,49}", "a letter then letters, digits or _, max 50 chars"),
+    "ga4_event_name": (r"[A-Za-z][A-Za-z0-9_]{0,39}", "a letter then letters, digits or _, max 40 chars"),
+}
+TOKEN_RE = re.compile(r"__[A-Z0-9]+(?:_[A-Z0-9]+)*__")
+
 
 def fail(msg):
     print(f"error: {msg}", file=sys.stderr)
     sys.exit(1)
+
+
+def validated(value, kind, flag):
+    pattern, desc = FORMATS[kind]
+    if not re.fullmatch(pattern, value):
+        fail(f"{flag} {value!r} is not valid: expected {desc}")
+    return value
+
+
+def js_escape(value):
+    # For Custom HTML: safe inside a '...' or "..." JS string and cannot
+    # close the surrounding <script> element.
+    out = value.replace("\\", "\\\\").replace("'", "\\'").replace('"', '\\"')
+    out = out.replace("\n", "\\n").replace("\r", "\\r")
+    return out.replace("<", "\\x3c").replace(">", "\\x3e")
+
+
+def substitute(node, tokens, in_html=False):
+    """Replace tokens in every string value of a parsed GTM container."""
+    if isinstance(node, dict):
+        is_html = node.get("key") == "html"
+        return {k: substitute(v, tokens, in_html or (is_html and k == "value"))
+                for k, v in node.items()}
+    if isinstance(node, list):
+        return [substitute(v, tokens, in_html) for v in node]
+    if isinstance(node, str):
+        for token, value in tokens.items():
+            if token in node:
+                node = node.replace(token, js_escape(value) if in_html else value)
+        return node
+    return node
+
+
+def leftover_tokens(node):
+    found = set()
+    if isinstance(node, dict):
+        for v in node.values():
+            found |= leftover_tokens(v)
+    elif isinstance(node, list):
+        for v in node:
+            found |= leftover_tokens(v)
+    elif isinstance(node, str):
+        found |= set(TOKEN_RE.findall(node))
+    return found
 
 
 def main():
@@ -53,39 +117,42 @@ def main():
             fail(f"--send {args.send} requires {flag}")
         return value
 
+    def event_name(default, kind="event_name"):
+        return validated(args.event_name or default, kind, "--event-name")
+
     tokens = {}
     if args.send == "google-ads":
         if not (args.conversion_id and args.conversion_label):
             fail("--send google-ads requires --conversion-id and --conversion-label")
-        tokens["__GOOGLE_ADS_CONVERSION_ID__"] = args.conversion_id.upper().removeprefix("AW-")
-        tokens["__GOOGLE_ADS_CONVERSION_LABEL__"] = args.conversion_label
+        conversion_id = re.sub(r"^AW-", "", args.conversion_id.strip(), flags=re.I)
+        tokens["__GOOGLE_ADS_CONVERSION_ID__"] = validated(conversion_id, "google_ads_id", "--conversion-id")
+        tokens["__GOOGLE_ADS_CONVERSION_LABEL__"] = validated(
+            args.conversion_label.strip(), "google_ads_label", "--conversion-label")
     elif args.send == "ga4":
         require(args.measurement_id, "--measurement-id")
-        if not args.measurement_id.upper().startswith("G-"):
-            fail(f"measurement ID should start with G- (got {args.measurement_id!r})")
-        tokens["__GA4_MEASUREMENT_ID__"] = args.measurement_id.upper()
-        tokens["__GA4_EVENT_NAME__"] = args.event_name or "generate_lead"
+        tokens["__GA4_MEASUREMENT_ID__"] = validated(
+            args.measurement_id.strip().upper(), "ga4_id", "--measurement-id")
+        tokens["__GA4_EVENT_NAME__"] = event_name("generate_lead", "ga4_event_name")
     elif args.send == "meta":
         require(args.pixel_id, "--pixel-id")
-        tokens["__META_PIXEL_ID__"] = args.pixel_id
-        tokens["__META_EVENT_NAME__"] = args.event_name or "Lead"
+        tokens["__META_PIXEL_ID__"] = validated(args.pixel_id.strip(), "meta_pixel", "--pixel-id")
+        tokens["__META_EVENT_NAME__"] = event_name("Lead")
     elif args.send == "tiktok":
         require(args.pixel_id, "--pixel-id")
-        tokens["__TIKTOK_PIXEL_ID__"] = args.pixel_id
-        tokens["__TIKTOK_EVENT_NAME__"] = args.event_name or "SubmitForm"
+        tokens["__TIKTOK_PIXEL_ID__"] = validated(args.pixel_id.strip(), "tiktok_pixel", "--pixel-id")
+        tokens["__TIKTOK_EVENT_NAME__"] = event_name("SubmitForm")
     elif args.send == "linkedin":
         require(args.partner_id, "--partner-id")
         require(args.conversion_id, "--conversion-id")
-        # This one is interpolated into JavaScript unquoted, so a non-numeric
-        # value would produce a container that throws on every page.
-        if not args.conversion_id.isdigit():
-            fail(f"LinkedIn --conversion-id must be digits only (got {args.conversion_id!r})")
-        tokens["__LINKEDIN_PARTNER_ID__"] = args.partner_id
-        tokens["__LINKEDIN_CONVERSION_ID__"] = args.conversion_id
+        tokens["__LINKEDIN_PARTNER_ID__"] = validated(
+            args.partner_id.strip(), "linkedin_partner", "--partner-id")
+        # Interpolated into JavaScript unquoted, so it must be digits.
+        tokens["__LINKEDIN_CONVERSION_ID__"] = validated(
+            args.conversion_id.strip(), "linkedin_conversion", "--conversion-id")
     elif args.send == "microsoft":
         require(args.uet_tag_id, "--uet-tag-id")
-        tokens["__MICROSOFT_UET_TAG_ID__"] = args.uet_tag_id
-        tokens["__MICROSOFT_EVENT_ACTION__"] = args.event_name or "submit_lead_form"
+        tokens["__MICROSOFT_UET_TAG_ID__"] = validated(args.uet_tag_id.strip(), "uet_tag", "--uet-tag-id")
+        tokens["__MICROSOFT_EVENT_ACTION__"] = event_name("submit_lead_form")
 
     tool = events[args.tool]
     tokens["__RECIPE_LABEL__"] = tool["label"]
@@ -116,15 +183,12 @@ def main():
 
     dcv["container"]["name"] = f"Conversion Tracking - {tool['label']} to {args.send}"
 
-    out = json.dumps(detect, indent=2)
-    for token, value in tokens.items():
-        out = out.replace(token, value)
-    leftover = [t for t in ("__GOOGLE_ADS", "__GA4_", "__META_", "__TIKTOK_",
-                            "__LINKEDIN_", "__MICROSOFT_", "__RECIPE", "__DETECTION") if t in out]
+    detect = substitute(detect, tokens)
+    leftover = sorted(leftover_tokens(detect))
     if leftover:
         fail(f"unreplaced placeholder tokens remain: {leftover}")
 
-    Path(args.out).write_text(out + "\n")
+    Path(args.out).write_text(json.dumps(detect, indent=2) + "\n")
     print(f"wrote {args.out}")
     print(f"  detects : {tool['label']} ({tool['moment']}) via dataLayer event '{tool['event']}'")
     print(f"  sends to: {args.send}")
