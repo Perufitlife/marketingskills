@@ -16,6 +16,11 @@
     });
   }
 
+  // 'form-submit' is the confirmed message the Typeform embed SDK sends on a
+  // completed submission (it carries formId and responseId). The other two
+  // names are best-guess aliases kept for older or third-party embed wrappers.
+  // 'embed-auto-close-popup' is deliberately NOT accepted: it is a UI close
+  // signal, not a submission, and carries no responseId.
   function looksLikeTypeformSubmit(data) {
     if (!data || typeof data !== 'object') return false;
     var t = data.type;
@@ -23,8 +28,7 @@
     return (
       t === 'form-submit' ||
       t === 'typeform.formSubmit' ||
-      t === 'typeform-form-submit' ||
-      t === 'embed-auto-close-popup'
+      t === 'typeform-form-submit'
     );
   }
 
