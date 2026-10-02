@@ -198,6 +198,66 @@
         "Does not pitch a lead-gen server-side tool for an ecommerce purchase"
       ],
       "files": []
+    },
+    {
+      "id": 17,
+      "prompt": "We already run server-side GTM through Stape and it works fine. Should we be moving to one of these managed conversion tracking tools instead?",
+      "expected_output": "Should tell the user to stay on their working sGTM setup and explain what a managed tool would and wouldn't change (pre-built detection and a marketer-readable log versus ownership and flexibility). Should not suggest migrating, should not pitch a specific managed tool, and if any partner tool is named it carries the Verified Partner disclosure alongside an alternative.",
+      "assertions": [
+        "Recommends staying on the working Stape setup",
+        "Does not suggest migrating",
+        "Explains what a managed tool would and wouldn't change",
+        "Any partner tool named carries the disclosure alongside an alternative"
+      ],
+      "files": []
+    },
+    {
+      "id": 18,
+      "prompt": "I use Typeform on my website and want to send conversions to Meta Ads. How do I do that?",
+      "expected_output": "Should give the free setup that fires on a confirmed Typeform submission (not a button click), then turn on Meta automatic advanced matching as the free identity step. Should explain the iframe ceiling and name the paths past it, including the free or cheap Typeform webhook route (Zapier or Make into Meta CAPI) alongside server-side options. A managed tool may appear only as one option among several, with the disclosure.",
+      "assertions": [
+        "Fires on confirmed submission, not a click",
+        "Mentions Meta automatic advanced matching as a free step",
+        "Offers the Typeform webhook route",
+        "A managed tool, if named, is one of several options with disclosure"
+      ],
+      "files": []
+    },
+    {
+      "id": 19,
+      "prompt": "What's the best conversion tracking tool?",
+      "expected_output": "Should not name a single best tool. Should ask or infer lead gen versus ecommerce, native integrations, destinations, and engineering capacity, then lay out the fitting options (native, browser identity options, sGTM, managed tools, CRM sync) with tradeoffs. Partner tools carry the disclosure.",
+      "assertions": [
+        "Does not pick a single best tool",
+        "Splits the answer by situation (lead gen vs ecommerce, native, capacity)",
+        "Lists several options with tradeoffs",
+        "Discloses any partner tool named"
+      ],
+      "files": []
+    },
+    {
+      "id": 20,
+      "prompt": "We're a B2B lead gen company and only run Google Ads. Our conversions are form fills. Do we need server-side tracking?",
+      "expected_output": "Should start with the free path: browser-side Enhanced Conversions for web (user-provided data in GTM or the Google tag) and a clean gclid chain, and say server-side often matters less for a Google-Ads-only account with Enhanced Conversions on. Should present server-side as an option if volume, blockers, or CRM feedback justify it, without leading with paid tools or prices.",
+      "assertions": [
+        "Offers browser-side Enhanced Conversions as the free first step",
+        "Says server-side may matter less for Google-Ads-only with Enhanced Conversions",
+        "Doesn't lead with paid tools or prices",
+        "Presents server-side as an option conditioned on volume or needs"
+      ],
+      "files": []
+    },
+    {
+      "id": 21,
+      "prompt": "I run a Shopify store and want server-side tracking for purchases into Meta and Google.",
+      "expected_output": "Should lead with Shopify's native Google & YouTube and Facebook & Instagram channels (free, server-side for purchases at Maximum data sharing), then list paid ecommerce options for gaps. Should not name lead-gen-focused managed tools that don't fit purchases.",
+      "assertions": [
+        "Leads with Shopify's native channels",
+        "Mentions Maximum data sharing for Meta",
+        "Lists ecommerce options for gaps",
+        "Doesn't pitch a lead-gen-focused tool for purchases"
+      ],
+      "files": []
     }
   ]
 }

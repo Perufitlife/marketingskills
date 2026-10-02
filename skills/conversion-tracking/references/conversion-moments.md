@@ -215,7 +215,7 @@ whole categories of business.
 **Never tell someone their tool is unsupported.** Every conversion moment falls into one of
 the install shapes below, and the universal patterns cover tools with no named detector.
 Some of these tools also have native server-side integrations from their own platform, and
-one of the managed tools there covers many of them as built-in triggers; both live in `server-side.md`. What
+managed tools listed there may cover them as built-in triggers; both live in `server-side.md`. What
 "no snippet" means is only that this skill's free browser-side detector does not exist yet.
 
 **Shape 1, page listener** (32): ActiveCampaign, Kit, AWeber, Mailchimp, Klaviyo, HubSpot
