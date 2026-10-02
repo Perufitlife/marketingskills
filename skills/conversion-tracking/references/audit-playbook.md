@@ -18,6 +18,8 @@ Before deep evidence gathering, run the cheap checks that catch the common cases
 - [ ] Do events appear in the platform's own diagnostics (Events Manager, DebugView, conversion action status)?
 - [ ] Was a conversion action ever created in the ad platform (a pixel with no conversion action collects data and optimises nothing)?
 - [ ] Is internal and test traffic excluded?
+- [ ] Any hardcoded test values left in live tags (a fixed value, a test event code, a placeholder ID)?
+- [ ] Does it fire on mobile and inside in-app browsers (Instagram, Facebook, LinkedIn webviews), not just desktop?
 - [ ] Does anything date the breakage (a platform deprecation, a plugin update, a consent banner launch, a site migration)? Check the platform calendar in `SKILL.md` and `ecommerce-platforms.md`.
 
 ## Step 1: static recon (no logins needed)
