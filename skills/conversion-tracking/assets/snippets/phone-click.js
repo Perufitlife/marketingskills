@@ -47,6 +47,8 @@
       lastNumber = number;
       lastAt = now;
 
+      // PII: if the site shows visitor-specific numbers (an account page, a
+      // CRM-driven "your rep" number), drop phone_number and link_text here.
       window.dataLayer.push({
         event: 'phone_click',
         phone_number: number,
