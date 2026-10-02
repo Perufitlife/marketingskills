@@ -10,7 +10,7 @@ The order record is the source of truth. Everything below follows from using it 
 - **Value correctness is where trust dies quietly.** Decide once whether reported value includes tax and shipping, apply it identically on every sender, and check the currency. Multi-currency stores can report the shopper's presentment currency to one platform and the store currency to another, which makes ROAS wrong in both directions at once.
 - **Item IDs must match the merchant feed.** Dynamic remarketing and Shopping campaigns join purchase item data against the product feed. IDs that do not match (variant ID sent where the feed carries the parent product ID, or vice versa) break the join silently; campaigns keep running on less data and nothing errors.
 - **Platforms optimise on the funnel, not just the purchase.** View item, add to cart, and begin checkout feed bidding and retargeting. A purchase-only setup works but underfeeds the algorithms.
-- **Refunds are an asymmetry, not a setting.** Google Ads supports conversion adjustments (restate for partial refunds, retract for full ones; gclid and gbraid only, and a retracted conversion can never be adjusted again). GA4 has a standard `refund` event. Meta has no refund mechanism at all. Almost nobody wires any of this up, so "are refunds adjusted anywhere?" is a legitimate audit question whose usual answer is no. Consequences in `discrepancies.md`.
+- **Refunds are an asymmetry, not a setting.** Google Ads supports conversion adjustments (restate for partial refunds, retract for full ones; gclid and gbraid only, within 54 days of the conversion and within 7 days for bidding to use them, and a retracted conversion can never be adjusted again). GA4 has a standard `refund` event. Meta has no refund mechanism at all. Almost nobody wires any of this up, so "are refunds adjusted anywhere?" is a legitimate audit question whose usual answer is no. Consequences in `discrepancies.md`.
 
 ## Shopify
 
@@ -23,6 +23,7 @@ Shopify removed the places people pasted tracking code for a decade, on these da
 | 1 Feb 2025 | Apps can no longer create script tags scoped to the order status page |
 | 28 Aug 2025 | Script tags and Additional Scripts stop on Thank you and Order status pages, **Plus stores** |
 | **26 Aug 2026** | The same stop for **all remaining stores**, applied by auto-upgrade whether or not the merchant migrated |
+| 1 Oct 2026 | Apps can no longer create or update storefront script tags (existing ones keep running until 1 Mar 2027) |
 | 1 Mar 2027 | Storefront script tags stop on the storefront proper (the next wave) |
 
 The failure is silent. Checkout works, the thank-you page renders, only the tags are gone. **Any Shopify store whose conversion tracking "just stopped" in late August 2026 should be checked for this before anything else.** The one-minute check is whether the missing tag lived in checkout's Additional Scripts or came from an app that customised the order pages. Most tracking guides on the internet still teach the dead method, so a user following a recent-looking tutorial can build an already-broken setup today.

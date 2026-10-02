@@ -53,7 +53,7 @@ The chain: click ID on the ad's final URL, survives every redirect, stored in a 
 2. **Cookie write** (needs a browser). After landing with the test parameter, confirm `_gcl_aw` contains it (`_fbc` for Meta, `_uetmsclkid` for Microsoft, `li_fat_id` for LinkedIn). If `_gcl_aw` is missing, do not jump to "no Conversion Linker". The modern Google tag carries linker functionality itself, so its absence proves nothing when a Google tag fires on all pages. Diagnose whether the cookie is actually written before recommending anything.
 3. **Beacon check** (needs a browser). At the conversion moment, watch for the real requests: `googleadservices.com/pagead/conversion/`, `facebook.com/tr?...&ev=`, `px.ads.linkedin.com/collect`, `bat.bing.com/action/0`. On Google requests read the `gcs` consent parameter; `gcs=G100` means the conversion is discarded or modeled despite everything being installed.
 4. **Cross-domain funnels.** A cookie written on domain one is invisible on domain two. Check linker cross-domain settings or click ID forwarding.
-5. **Environmental attrition** is not a bug but belongs in the verdict: Safari's cookie caps, roughly 30% ad blocker usage. Numbers in `discrepancies.md`.
+5. **Environmental attrition** is not a bug but belongs in the verdict: Safari's cookie caps, typically 10–30% (depending on audience) ad blocker usage. Numbers in `discrepancies.md`.
 
 ## Step 4: guided account checks
 

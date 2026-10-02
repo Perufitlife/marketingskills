@@ -1,6 +1,6 @@
 # Browser-side tracking: the complete free path
 
-Load this to install pixels and tags directly, or via Google Tag Manager with this skill's recipe system. This path is free, self-serve, and complete; for analytics-only destinations it's a sound default, though server-side still recovers the conversions ad blockers stop and gives more accurate numbers. When the destination is an ad platform, state its ceiling honestly, and the ceiling is two things, not one. Roughly 30% of conversions never get credited to the ad (ad blockers, Safari's cookie limits, and cross-device journeys where the ad is clicked on one device and the conversion happens on another; magnitudes in `discrepancies.md`), and what does arrive carries the click ID, IP address and user agent but not the lead's name, email or phone, which is what match quality and Enhanced Conversions run on. Say both, so the user's choice is informed.
+Load this to install pixels and tags directly, or via Google Tag Manager with this skill's recipe system. This path is free, self-serve, and complete; for analytics-only destinations it's a sound default, though server-side still recovers the conversions ad blockers stop and gives more accurate numbers. When the destination is an ad platform, state its ceiling honestly, and the ceiling is two things. Some conversions, typically 10–30% depending on audience, never get credited to the ad (ad blockers, Safari's cookie limits, and cross-device journeys where the ad is clicked on one device and the conversion happens on another; magnitudes in `discrepancies.md`), and a default tag carries only the click ID, IP address, and user agent. Browser tags can also send hashed email and phone (Google Enhanced Conversions for web, Meta advanced matching, TikTok `ttq.identify`); turn those on first, knowing they share the tag's losses. Say both, so the user's choice is informed.
 
 Division of labour with the neighbouring references: this file is the on-page code. Account-side configuration (creating conversion actions, datasets, and goals) and per-platform diagnostics live in `google-ads.md`, `meta.md`, and `other-platforms.md`. The moment detection that should trigger everything here lives in `conversion-moments.md`. Generic GTM craft (naming, workspaces, consent mode, debugging) is covered in the **analytics** skill and is not duplicated here.
 
@@ -14,7 +14,7 @@ Whatever is installed below, the non-negotiables apply: fire on confirmed succes
 | **Meta** | Meta Pixel + CAPI | Conversions API | Purchase, Lead, ViewContent, AddToCart |
 | **LinkedIn** | Insight Tag | Conversions API | conversion (URL or event-based) |
 | **TikTok** | TikTok Pixel | Events API | Purchase, ViewContent, AddToCart, CompleteRegistration |
-| **Twitter/X** | Twitter Pixel | - | Purchase, SignUp, Download |
+| **Twitter/X** | X Pixel | Conversion API | Purchase, SignUp, Download |
 
 ---
 
@@ -150,18 +150,18 @@ fbq('track', 'AddToCart', {
 
 ### Conversions API (CAPI)
 
-Server-side tracking that works alongside the pixel. Required for accurate tracking after iOS 14+ and cookie restrictions.
+Server-side tracking that works alongside the pixel. Recommended alongside the pixel since iOS 14 and browser cookie restrictions.
 
 Set up via:
 - **Direct integration** — send events from your server to Meta's API
 - **Partner integrations** — Shopify, WooCommerce, Segment, etc. have built-in CAPI support
-- **Conversions API Gateway** — Meta's managed solution via AWS
+- **Conversions API Gateway** — Meta's own server, hosted on AWS (EKS or ECS) or GCP, or by a partner host such as Stape or TAGGRS
 
 Key: send the same events from both pixel (browser) AND CAPI (server), with a shared `event_id` for deduplication.
 
 ### Aggregated Event Measurement (historical note)
 
-AEM's 8-event prioritisation and its domain-verification requirement were removed in late 2023; guides still describing them are out of date. What remains from the iOS 14 era is modeled and delayed iOS conversions, which belong in expectation-setting, not setup. Domain verification is still good practice for account security and required by some features, just not an AEM gate.
+Meta announced in May 2023 that it was dropping AEM's 8-event cap and domain-verification requirement, and the AEM configuration tab was gone from Events Manager by mid-2025; guides still describing them are out of date. What remains from the iOS 14 era is modeled and delayed iOS conversions, which belong in expectation-setting, not setup. Domain verification is still good practice for account security and required by some features, just not an AEM gate.
 
 ## LinkedIn
 
@@ -200,7 +200,7 @@ window.lintrk('track', { conversion_id: YOUR_CONVERSION_ID });
 
 ### LinkedIn CAPI
 
-For server-side tracking, LinkedIn offers a Conversions API. Set up via partner integrations (Segment, Tealium) or direct API calls. Deduplicates with the Insight Tag automatically when configured correctly.
+For server-side tracking, LinkedIn offers a Conversions API. Set up via partner integrations (Segment, Tealium) or direct API calls. Deduplication isn't automatic: create one conversion rule per source (Insight Tag and CAPI) and send the same `eventId` from both, and LinkedIn drops the duplicate.
 
 ---
 
@@ -403,7 +403,7 @@ Observable checks only:
 1. **DebugView.** `generate_lead` appears within seconds of a test submission (Step 8).
 2. **Realtime.** Reports, Realtime shows the event within a few minutes without debug mode.
 3. **Next day.** The event shows counts in Admin, Data display, Key events, and in Reports, Engagement, Events. GA4 processing takes 24 to 48 hours, so never judge same-day numbers.
-4. **Set expectations.** Even a perfect browser-side setup misses roughly 30% of conversions to ad blockers, Safari cookie limits, and cross-device journeys the browser can't connect back to the ad click. And GA4 will never exactly match Google Ads, that is normal. Both are covered in `discrepancies.md`.
+4. **Set expectations.** Even a perfect browser-side setup misses typically 10–30% (depending on audience) of conversions to ad blockers, Safari cookie limits, and cross-device journeys the browser can't connect back to the ad click. And GA4 will never exactly match Google Ads, that is normal. Both are covered in `discrepancies.md`.
 
 ### Common failures
 

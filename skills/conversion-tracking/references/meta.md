@@ -129,13 +129,13 @@ Use the standard Lead event, not a custom name. Meta parks first-seen custom eve
 
 Event Match Quality (EMQ) is Meta's 1 to 10 score for how well it can match each event to a real person. The user can see it by opening the Lead event's card in Events Manager and clicking View details. Scores update slowly, so allow 24 to 48 hours after changes.
 
-A browser-only Lead like the one built above typically scores 3 to 5. That is expected, not broken. It carries only cookie and browser signals (the _fbp and _fbc cookies, IP, user agent) and no customer information. Raising EMQ requires sending the lead's actual details, such as hashed email and phone, through advanced matching or the Conversions API. Doing that well is precisely what server-side tracking tools exist for. See server-side.md for the realistic options.
+A browser-only Lead like the one built above typically scores 3 to 5. That is expected, not broken. It carries only cookie and browser signals (the _fbp and _fbc cookies, IP, user agent) and no customer information. (These scores are practitioner-reported, not published by Meta.) Raising EMQ requires sending the lead's actual details, such as hashed email and phone, through advanced matching or the Conversions API. Turn on automatic advanced matching in Events Manager first (free); CAPI is the next step, with options in `server-side.md`.
 
 The Conversions API (CAPI) sends the same events server to server, which ad blockers and Safari's cookie limits cannot touch, and it can attach the customer details that lift EMQ. One rule matters above all when pixel and CAPI both run. Each real-world conversion sent from both must share the same event_id and event_name, because Meta deduplicates on that pair only. Mismatched IDs mean every lead counts twice, and "lead" versus "Lead" are different names. A healthy pair shows 1 row marked Deduplicated in Test Events.
 
 The honest boundary. Building CAPI yourself needs a server or a paid vendor, an access token, SHA-256 hashing of normalized customer data, and event_id coordination with the pixel. That is beyond a copy-paste setup, so route this decision through server-side.md rather than improvising it.
 
-Set expectations either way. Even a perfectly configured browser-side setup misses roughly 30% of conversions to ad blockers, Safari cookie limits, and cross-device journeys the browser can't connect back to the ad click. Details and magnitudes are in discrepancies.md.
+Set expectations either way. Even a perfectly configured browser-side setup misses typically 10–30% (depending on audience) of conversions to ad blockers, Safari cookie limits, and cross-device journeys the browser can't connect back to the ad click. Details and magnitudes are in discrepancies.md.
 
 ### Verification
 
@@ -187,13 +187,15 @@ Events will show. Two behaviours worth knowing before interpreting what a user r
 - **M5. New custom events "Blocked by Meta"** (OCCASIONAL): first-seen custom event names parked as blocked until owner approves. Events Manager > Settings > Manage Event Blocking. ~20 min to activate after unblocking.
 - **M6. Duplicate events** (VERY COMMON): two installs (theme+GTM+plugin); click AND thank-you both firing; Pixel + CAPI without matching event_id. Meta dedups on event_name + event_id ONLY. Case mismatch ("lead" vs "Lead"), regenerated IDs, reused IDs all break dedup. Healthy pair shows one row marked "Deduplicated" in Test Events.
 - **M7. CAPI arrives but low Event Match Quality** (VERY COMMON): EMQ 1-10; drivers in order: hashed email, hashed phone (E.164), fbc, fbp, IP+UA, name/zip, external_id. PII must be SHA-256 after normalization (lowercase, trimmed). Missing phone or unforwarded _fbp/_fbc tanks it. Check event card > View Details; allow 24-48h after changes.
-- **M8. CAPI plumbing failures** (COMMON): expired token, wrong dataset ID, event_time >7 days old rejected, missing action_source, no user_data at all. Use Test Events with test_event_code.
+- **M8. CAPI plumbing failures** (COMMON): expired token, wrong dataset ID, event_time >7 days old rejected (physical-store events up to 62 days), missing action_source, no user_data at all. Use Test Events with test_event_code.
 - **M9. Pixel Helper warnings**: "did not load" = fbevents.js blocked; "activated multiple times" = duplicate; "took too long" = lost on redirect; "new domain sending data" = hijacked pixel (fix with Traffic Permissions).
-- **M10. Browser/device attrition** (STRUCTURAL): roughly 30% below the form backend; iOS worst. The core CAPI argument.
-- **M11. iOS14/AEM legacy** (mostly resolved): 8-event prioritization + domain verification requirements REMOVED late 2023. Residual: modeled/delayed iOS conversions.
+- **M10. Browser/device attrition** (STRUCTURAL): typically 10–30% below the form backend depending on audience; iOS worst. The core CAPI argument.
+- **M11. iOS14/AEM legacy** (mostly resolved): 8-event cap + domain verification requirement dropped (announced May 2023); the AEM tab left Events Manager around mid-2025. Residual: modeled/delayed iOS conversions.
 - **M12. Custom event not selectable in Ads Manager** (OCCASIONAL): custom names need a custom conversion wrapper to optimize on. Prefer standard `Lead` event.
 
 ### Meta CAPI requirements
+Meta's standalone Offline Conversions API shut down on 14 May 2025; offline and CRM events now go through the Conversions API with an `action_source`.
+
 Dataset ID + access token (Events Manager > Settings), POST to `graph.facebook.com/v*/{dataset_id}/events`. Needs event_name, event_time (≤7d), action_source, event_id (dedup), user_data with ≥1 identifier (email/phone SHA-256 lowercased/trimmed; fbp/fbc/IP/UA raw). SMB difficulty: server code or paid intermediary, event_id coordination, hashing rules, token management, dedup verification.
 
 ### Test tooling

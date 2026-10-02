@@ -38,7 +38,7 @@ Set expectations before diagnosing. Reasons a perfect setup still diverges:
 
 ### 2.2 Consent Mode v2 misimplementation (silent Google Ads killer)
 - Symptom: Ads conversions collapse (documented 90% overnight drop) while clicks/spend continue.
-- Mechanism: banner looks functional but never transmits ad_user_data/ad_personalization → Google discards conversions. Enforced hard July 2025.
+- Mechanism: banner looks functional but never transmits ad_user_data/ad_personalization → Google discards conversions. Stricter enforcement from July 2025 is widely reported (not a formal Google announcement).
 - Confirm: GTM Preview Consent tab; gcs/gcd params; Google diagnostics lag 48-72h.
 - Magnitude: post-fix only ~40% of lost attribution recoverable via modeling.
 
@@ -127,7 +127,7 @@ Set expectations before diagnosing. Reasons a perfect setup still diverges:
 
 Platforms disagree about whether a refunded purchase ever stops being a conversion:
 
-- **Google Ads** supports conversion adjustments. Restate changes the value (partial refund), retract removes the conversion entirely. Adjustments work with gclid and gbraid, not wbraid, generally need an order_id, and are one-shot: a retracted conversion can never be adjusted again.
+- **Google Ads** supports conversion adjustments. Restate changes the value (partial refund), retract removes the conversion entirely. Adjustments work with gclid and gbraid, not wbraid, generally need an order_id, must happen within 54 days (within 7 days for bidding to use them), and are one-shot: a retracted conversion can never be adjusted again.
 - **GA4** has a standard `refund` event keyed on transaction_id.
 - **Meta** has no refund mechanism at all. A sent Purchase stays counted forever.
 

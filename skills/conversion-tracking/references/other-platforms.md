@@ -9,7 +9,7 @@ Contents:
 4. TikTok Ads (pixel and form events)
 5. Verification and common failures
 
-Before you start. You usually cannot log into the user's ad accounts, so account steps are guided. Give exact clicks and ask what they see. Website and GTM steps you can do yourself with access. Conversion moments come from this repo's detection snippets, which push canonical dataLayer events at the true submission moment. The names live in ../assets/gtm-recipes/event-map.json and snippets/README.md (for example, Typeform pushes typeform_form_submitted). And set expectations once, up front. Even a perfect browser-side setup misses roughly 30% of conversions to ad blockers, Safari cookie limits, and cross-device journeys the browser can't connect back to the ad click. See discrepancies.md.
+Before you start. You usually cannot log into the user's ad accounts, so account steps are guided. Give exact clicks and ask what they see. Website and GTM steps you can do yourself with access. Conversion moments come from this repo's detection snippets, which push canonical dataLayer events at the true submission moment. The names live in ../assets/gtm-recipes/event-map.json and snippets/README.md (for example, Typeform pushes typeform_form_submitted). And set expectations once, up front. Even a perfect browser-side setup misses typically 10–30% (depending on audience) of conversions to ad blockers, Safari cookie limits, and cross-device journeys the browser can't connect back to the ad click. See discrepancies.md.
 
 ### LinkedIn Ads
 
@@ -150,7 +150,7 @@ Direct API path: non-expiring token from Campaign Manager > Signals Manager > Di
 - **T3. Lead fires at wrong moment / missing params** (COMMON): redirect race, GTM selector issues
 - **T4. "First-party cookies not found"** (OCCASIONAL): disabled in pixel settings
 - **T5. Advanced Matching format errors** (COMMON): email lowercase, phone E.164, else silently useless
-- **T6. Consent/ad-blocker suppression** (VERY COMMON): roughly 30% loss typical
+- **T6. Consent/ad-blocker suppression** (VERY COMMON): typically 10–30% loss, depending on audience
 - **T7. Dedup misconfigured Pixel vs Events API** (COMMON): dedup on event_id + name within 48h window
 - **T8. Events API auth/payload failures** (COMMON): expired token, malformed timestamps, unhashed PII
 - **T9. SPA navigation untracked** (COMMON): call ttq.page() on route changes
@@ -181,7 +181,7 @@ Pixel code + self-serve access token (easier than LinkedIn). event_id mirrored w
 - **B9. Copying goals from Google without adjustment** (OCCASIONAL): imported campaigns don't import working tracking.
 
 #### Server-side
-No SMB-level web CAPI equivalent. Paths: offline conversion imports via msclkid captured to CRM, or UET enhanced conversions with hashed email/phone. Failure: msclkid never captured in hidden field or auto-tagging off. Test: UET Tag Helper extension (green/yellow/red), bat.bing.com/action/0 requests, goal Tracking Status.
+Microsoft Conversions API exists as a per-account pilot (as of 2026-09): enroll through your account manager or support; it takes web, CRM, and offline events no older than 7 days. Otherwise: offline conversion imports via msclkid captured to CRM, or UET enhanced conversions with hashed email/phone. Failure: msclkid never captured in hidden field or auto-tagging off. Test: UET Tag Helper extension (green/yellow/red), bat.bing.com/action/0 requests, goal Tracking Status.
 
 ### Cross-platform cheatsheet
 
@@ -192,10 +192,10 @@ No SMB-level web CAPI equivalent. Paths: offline conversion imports via msclkid 
 | Global | fbq | lintrk, _linkedin_data_partner_ids | ttq | uetq |
 | Click ID → cookie | fbclid → _fbc (90d; ITP 24h/7d) | li_fat_id → li_fat_id (30d) | ttclid → ttclid (13mo) | msclkid → _uetmsclkid (~90d) |
 | Browser ID | _fbp (90d) | member cookies (3rd party) | _ttp (13mo) | _uetvid (13mo) |
-| Dedup key | event_name + event_id | URL-rule scoping | event_id + name, 48h | goal-level |
-| Server-side | CAPI (token, hashed em/ph, event_id) | CAPI (Direct API token, email/li_fat_id) | Events API (token, em/ph, ttclid) | Offline imports via msclkid |
+| Dedup key | event_name + event_id | eventId shared by Insight Tag and CAPI, one conversion rule per source | event_id + name, 48h | goal-level |
+| Server-side | CAPI (token, hashed em/ph, event_id) | CAPI (Direct API token, email/li_fat_id) | Events API (token, em/ph, ttclid) | Conversions API (pilot), or offline imports via msclkid |
 | Test tool | Test Events + Pixel Helper | Campaign Manager status only | Test Events + Pixel Helper | UET Tag Helper |
 
-Universal checks every audit: consent banner (accept vs decline test); ad-blocker attrition roughly 30%; redirect-before-beacon race; iframe embeds; SPA routes; thank-you missing base tag; duplicate installs; wrong account/ID; URL-rule mismatches; testing hygiene (incognito, real ad clicks, 24h lags).
+Universal checks every audit: consent banner (accept vs decline test); ad-blocker attrition typically 10–30% (depending on audience); redirect-before-beacon race; iframe embeds; SPA routes; thank-you missing base tag; duplicate installs; wrong account/ID; URL-rule mismatches; testing hygiene (incognito, real ad clicks, 24h lags).
 
 Key sources: trackingplan.com meta pixel; watsspace.com dedup; niblin.com EMQ; ego-digital.io _fbc; measureschool.com; jonloomer.com AEM; bluefroganalytics.com LinkedIn; jacobfilipp.com LinkedIn; b2linked.com ep38; learn.microsoft.com LinkedIn CAPI + click IDs; benly.ai TikTok; admanage.ai TikTok helper; ads.tiktok.com cookies; conversios.io UET; mbadv.agency Microsoft UET; help.ads.microsoft.com.

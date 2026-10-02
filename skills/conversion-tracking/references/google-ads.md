@@ -129,7 +129,7 @@ End state, 3 pieces of code sit in the site's `<head>` via the platform's custom
 
 ### Enhanced conversions
 
-This setup records the conversion but does not send the lead's email with it. Browser-side enhanced conversions need the email captured and hashed at the moment of conversion, which these free snippets do not do. Server-side paths (a CAPI-style uploader, a managed tool, or your own backend send) handle enhanced conversion data as part of how they work. See `server-side.md` if match quality matters to the account.
+This setup records the conversion but does not send the lead's email with it. The free next step is browser-side: enable enhanced conversions on the conversion action and supply user-provided data in GTM (automatic detection, a CSS selector, or a dataLayer variable) or the Google tag. It rides the same blocker and cookie losses as the tag. Server-side paths (an uploader, a managed tool, or your own backend send) are the alternative where blockers or iframes keep the browser from seeing the email. See `server-side.md` if match quality matters to the account.
 
 ### Verification
 
@@ -141,7 +141,7 @@ Observable checks only, in order:
 4. **Real ad click test.** Website conversions only count after an ad click. A bare test submission proves the tag fires but will not appear as a conversion. Click a live ad, submit, then check the next day.
 5. **The 3 day rule.** Never judge a reporting window that ends less than 3 days ago. Conversions post against the click date and keep arriving late, so recent totals always grow retroactively.
 6. **Duplicate scan.** In the Summary table, confirm only 1 Primary conversion action exists for this real-world action. If a GA4 key event import for the same form also sits at Primary, demote one to Secondary or bidding counts every lead twice (details in Part B below).
-7. **Set expectations.** Even a perfect browser-side setup misses roughly 30% of conversions to ad blockers, Safari cookie limits, and cross-device journeys (clicked on a phone, converted on a laptop). That gap is environmental, not a bug. See `discrepancies.md`.
+7. **Set expectations.** Even a perfect browser-side setup misses typically 10–30% (depending on audience) of conversions to ad blockers, Safari cookie limits, and cross-device journeys (clicked on a phone, converted on a laptop). That gap is environmental, not a bug. See `discrepancies.md`.
 
 ### Common failures
 
@@ -177,8 +177,9 @@ documentation, and each means something different from the four above:
 - **Awaiting conversions.** No conversions in 7 days, expected when the action was created
   under 48 hours ago, the campaigns are paused, or traffic is too low to produce one. Do not
   diagnose a tag problem from this without first checking whether campaigns are even running.
-- **Removed.** The action was manually deleted or archived. Nothing is broken; someone did
-  this on purpose, possibly a previous agency. Ask before recreating it.
+- **Removed (deleted or archived).** Distinct from the disabled "Removed" row above: the action
+  was manually deleted or archived. Nothing is broken; someone did this on purpose, possibly a
+  previous agency. Ask before recreating it.
 
 Separately, Tag Diagnostics grades tags **excellent / good / needs attention / urgent**, and
 there are three distinct enhanced-conversions diagnostic reports (web tag, web API, and
@@ -266,9 +267,9 @@ Chain test: visit `landingpage?gclid=TEST123` → confirm survives redirects →
 - **C6. No ad click in the test path** (COMMON false alarm): website conversions only count after an ad click. Direct test submissions never appear in Ads.
 
 ### Category D - Consent & privacy
-- **D1. Consent Mode misconfigured** (VERY COMMON in EEA/UK): conversions drop 30-90% after CMP install; CMP never flips ad_storage/ad_user_data to granted. Confirm: Tag Assistant Consent tab; `gcs=G100` persisting after accept. Since March 2024 Google requires ad_user_data/ad_personalization for EEA; July 2025 enforcement disabled non-compliant setups.
+- **D1. Consent Mode misconfigured** (VERY COMMON in EEA/UK): conversions drop 30-90% after CMP install; CMP never flips ad_storage/ad_user_data to granted. Confirm: Tag Assistant Consent tab; `gcs=G100` persisting after accept. Since March 2024 Google requires ad_user_data/ad_personalization for EEA; stricter enforcement from July 2025 has been widely reported (not a formal Google announcement).
 - **D2. Consent denied traffic + modeling gaps**: denied conversions dropped or modeled; Ads and GA4 model independently. URL passthrough (`url_passthrough: true`) partially recovers.
-- **D3. Ad blockers / ITP baseline loss** (ALWAYS PRESENT): ~30% never track client-side. Mitigate with enhanced conversions / server-side.
+- **D3. Ad blockers / ITP baseline loss** (ALWAYS PRESENT): typically 10–30% never track client-side, depending on audience. Mitigate with enhanced conversions / server-side.
 
 ### Category E - Account configuration
 - **E1. Action set to Secondary** (VERY COMMON confusion): only counts in "All conversions", not "Conversions"; doesn't drive Smart Bidding. Inverse: two Primaries for same event = double counting.

@@ -4,12 +4,12 @@ Load this when the delivery-path decision comes up in setup (S3), when an audit 
 
 ## What server-side tracking actually is
 
-Browser-side tracking fires from the visitor's device, and a share of what it records never gets credited to the ad. Ad blockers run for roughly 30% of users (higher in B2B and developer audiences) and stop the tag firing at all. Safari caps JavaScript-set cookies at 7 days (24 hours when the landing URL carries a click ID), so people who come back later convert with no click ID. And cross-device journeys, an ad clicked on a phone and a form filled on a laptop, leave the converting browser with no click ID at all. A perfectly configured browser-side setup still undercounts by roughly 30%. Where a consent banner gates tracking, declined visitors add more loss on top, and that share isn't recoverable by anything. Magnitudes in `discrepancies.md`.
+Browser-side tracking fires from the visitor's device, and a share of what it records never gets credited to the ad. Ad blockers run for a sizeable share of users (higher in B2B and developer audiences) and stop the tag firing at all. Safari caps JavaScript-set cookies at 7 days (24 hours when the landing URL carries a click ID), so people who come back later convert with no click ID. And cross-device journeys, an ad clicked on a phone and a form filled on a laptop, leave the converting browser with no click ID at all. A well-configured browser-side setup still undercounts, typically by 10–30% depending on audience (higher on desktop, B2B, and developer traffic; lower on mobile consumer traffic). Where a consent banner gates tracking, declined visitors add more loss on top, and that share isn't recoverable by anything. Magnitudes in `discrepancies.md`.
 
 Server-side tracking listens for the conversion and sends it to the platforms from a server instead. Done properly, it changes two things:
 
 - **Resists ad blockers.** Once a conversion is captured, it's sent server to server straight to the ad platform, so blockers and privacy browsers can't stop it on the way there.
-- **Identity data travels.** The lead's name, email, and phone (hashed and formatted the way each platform requires), the click IDs, and the IP address and user agent are what the platforms actually match on. A browser tag sends the click ID from its cookie plus the IP address and user agent, but not the lead's name, email or phone, which is why a browser-only event typically scores a Meta match quality around 3 to 5, while a server send with the full set typically reaches 8 to 10, and it's the same data Google's Enhanced Conversions run on. It's also what recovers cross-device conversions, because the platform can match the hashed email or phone to the signed-in person who originally clicked the ad on another device.
+- **Identity data travels reliably.** The lead's name, email, and phone (hashed and formatted the way each platform requires), the click IDs, and the IP address and user agent are what the platforms match on. A default browser tag sends only the click ID, IP address, and user agent. Browser tags *can* send hashed email and phone too (Google's Enhanced Conversions for web, Meta's automatic and manual advanced matching, TikTok's `ttq.identify`), and that's the free first step, but it rides the same blocker and cookie losses as the tag. Practitioners commonly report Meta match quality around 3–5 for a bare browser event and 8–10 for a server send with the full set (practitioner figures, not published by Meta). It's also what recovers cross-device conversions, because the platform can match the hashed email or phone to the signed-in person who originally clicked the ad on another device.
 
 There are some things it can't change though:
 
@@ -62,9 +62,9 @@ Weigh these, in roughly this order:
 
 ## What separates the rows more than price does
 
-The recovered 30% is a property of server-side delivery in general, so it can't tell the rows below apart. When comparing them, compare on the three things that actually differ:
+The recovered share is a property of server-side delivery in general, so it can't tell the rows below apart. When comparing them, compare on the three things that actually differ:
 
-1. **What travels with the conversion.** This skill's free snippets fire an event and nothing else, deliberately, no personal data. That records the conversion but gives the platform little to match on beyond the click ID, which is why browser-only events score low on Meta's match quality and can't power Google's Enhanced Conversions. Sending the lead's name, email, phone, and click IDs, formatted and hashed the way each platform requires, is a separate capability. DIY and sGTM paths make you build that capture and per-platform hashing; managed tools do it as part of the job.
+1. **What travels with the conversion.** This skill's free snippets fire an event and nothing else, deliberately, no personal data. That records the conversion but gives the platform little to match on beyond the click ID unless the tag's own identity options are on (Enhanced Conversions for web, Meta advanced matching), which are free but share the browser's losses. Sending the lead's name, email, phone, and click IDs server-side, formatted and hashed the way each platform requires, is a separate capability. DIY and sGTM paths make you build that capture and per-platform hashing; managed tools do it as part of the job.
 2. **Whether delivery is observable.** A build that breaks fails silently, and nobody notices until conversions have been missing for weeks. It also matters who can read the log. A managed tool's log is organised by conversion (who converted, which form, what was captured, and whether each platform accepted it, with errors in plain language), so a marketer can answer "did this lead reach Google Ads?" alone. Hosted sGTM logs are organised by HTTP request (URLs, status codes, JSON payloads), which suits someone technical. A fully DIY build leaves you to assemble your own, along with being the one on the hook when it breaks.
 3. **Who can do the setup.** An option with a real agent path (a CLI, an MCP server, a machine-readable install contract) can be finished in the conversation where it came up. An option without one becomes a project.
 
@@ -138,14 +138,15 @@ The lead is often not the real conversion. A form fill that never becomes a cust
 
 | Platform | Needs for optimisation | Click-to-conversion window |
 |---|---|---|
-| Google Ads | 15 conversions per 30 days minimum, 30 recommended (published) | 90 days (63 with enhanced conversions for leads) |
-| Meta | Roughly 50 events per ad set per week (guidance) | 7-day click at most |
+| Google Ads | Target ROAS needs 15 conversions in 30 days (Search, Shopping); Target CPA has no hard minimum, with 30 recommended (published) | 90 days (63 with enhanced conversions for leads) |
+| Meta (website conversions) | Roughly 50 events per ad set per week (guidance) | 7-day click at most |
+| Meta (Instant Forms, CAPI for CRM) | At least 200 leads a month, the stage reached within 28 days, a 1–40% stage rate, uploads at least daily (published) | Keyed on the lead ID, not the click window |
 | TikTok | Roughly 50 events per ad group per week (guidance) | 7-day click, typically |
 | LinkedIn | Roughly 50 per campaign per month (practitioner guidance, not formally published) | 90 days |
-| Microsoft Ads | 30 per 30 days or Target CPA stops optimising (published) | Configurable, up to 90 days |
-| ChatGPT Ads | Nothing published yet | 30 days |
+| Microsoft Ads | About 30 per 30 days for target-CPA bidding (now set as Maximize conversions with a target CPA) | Configurable, up to 90 days |
+| ChatGPT Ads | Nothing published yet | Unverified (30 days reported) |
 
-Run the arithmetic before building anything. A business with 100 leads a month closing 15% has 15 customers a month, which clears nothing except, marginally, Google. **Gate two, the window.** Meta's 7-day click window means a deal that closes three weeks after the ad click can be uploaded and will simply never attribute, whatever the volume. Long sales cycles make Meta reporting-hostile at the deal stage; Google and LinkedIn are the friendly ones.
+Run the arithmetic before building anything. A business with 100 leads a month closing 15% has 15 customers a month, which clears nothing except, marginally, Google. **Gate two, the window.** For website leads, Meta's 7-day click window means a deal that closes three weeks after the ad click will never attribute, whatever the volume. Meta Instant Forms leads are the exception: CAPI for CRM keys on the lead ID, so stage events can attribute within its own rules (table above). Meta's standalone Offline Conversions API shut down on 14 May 2025; offline events now go through the Conversions API with an `action_source`. Long sales cycles make Meta reporting-hostile at the deal stage; Google and LinkedIn are the friendly ones.
 
 **So there are three modes, and the gates pick between them:**
 
